@@ -75,6 +75,12 @@ namespace StarterAssets
         [Tooltip("For locking the camera position on all axis")]
         public bool LockCameraPosition = false;
 
+        [Header("Effects")]
+        public SlashEffect slashVFX; // 이펙트 스크립트 연결
+        public ParticleSystem attack2VFX; // Attack2 이펙트 추가
+        public ParticleSystem BlockVFX; // Attack2 이펙트 추가
+
+
         // cinemachine
         private float _cinemachineTargetYaw;
         private float _cinemachineTargetPitch;
@@ -452,6 +458,31 @@ namespace StarterAssets
                     _animator.SetTrigger(_animIDAttack4); // Attack4 실행
                 }
             }
+        }
+
+        private void Slash()
+        {
+            if (slashVFX != null)
+                {
+                    slashVFX.Play();
+                }
+        }
+
+        private void Skill1()
+        {
+            if (attack2VFX != null) // 이펙트 실행
+                {
+                    attack2VFX.Play();
+                }
+        }
+
+        private void Block()
+        {
+            if (BlockVFX != null) // 이펙트 실행
+            {
+                BlockVFX.Play();
+            }
+            
         }
 
 
