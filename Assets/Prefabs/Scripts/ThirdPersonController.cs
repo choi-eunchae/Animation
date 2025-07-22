@@ -16,10 +16,10 @@ namespace StarterAssets
     {
         [Header("Player")]
         [Tooltip("Move speed of the character in m/s")]
-        public float MoveSpeed = 2.0f;
+        public float MoveSpeed = 2.0f; //걷기 속도
 
         [Tooltip("Sprint speed of the character in m/s")]
-        public float SprintSpeed = 5.335f;
+        public float SprintSpeed = 5.335f; //뛰기 속도
 
         [Tooltip("How fast the character turns to face movement direction")]
         [Range(0.0f, 0.3f)]
@@ -101,7 +101,10 @@ namespace StarterAssets
         // 근거리 공격(칼) 애니메이션 ID 추가
         private int _animIDAttack1;
         private int _animIDAttack2;
+        private int _animIDAttack3;
+        private int _animIDAttack4;
         private int _animIDBlock; // 방패 애니메이션 ID 추가
+        private bool _isDead = false; // 죽음 상태 체크
 
 #if ENABLE_INPUT_SYSTEM
         private PlayerInput _playerInput;
@@ -159,6 +162,7 @@ namespace StarterAssets
 
         private void Update()
         {
+            if (_isDead) return; // 죽었으면 입력/이동/공격 스킵
             _hasAnimator = TryGetComponent(out _animator);
 
             JumpAndGravity();
@@ -167,6 +171,11 @@ namespace StarterAssets
             HandleAttack();
 
             ToggleRootMotion();
+            
+            // if (Keyboard.current.kKey.wasPressedThisFrame)
+            // {
+            //     Die(); // K 키 누르면 죽음 발동 구현되는지 실험
+            // }
         }
 
         private void LateUpdate()
@@ -184,6 +193,8 @@ namespace StarterAssets
             // Attack1 애니메이션 해시 추가
             _animIDAttack1 = Animator.StringToHash("Attack1"); //Attact 트리거
             _animIDAttack2 = Animator.StringToHash("Attack2"); //Attact 트리거
+            _animIDAttack3 = Animator.StringToHash("Attack3"); //Attact 트리거
+            _animIDAttack4 = Animator.StringToHash("Attack4"); //Attact 트리거
             _animIDBlock = Animator.StringToHash("Block");     //방패 트리거 추가
         }
 
@@ -225,7 +236,7 @@ namespace StarterAssets
         }
 
         private void Move()
-        {   if (_animator.GetCurrentAnimatorStateInfo(0).IsTag("Attack")) return;
+        {   
             // set target speed based on move speed, sprint speed and if sprint is pressed
             float targetSpeed = _input.sprint ? SprintSpeed : MoveSpeed;
 
@@ -290,6 +301,27 @@ namespace StarterAssets
                 _animator.SetFloat(_animIDSpeed, _animationBlend);
                 _animator.SetFloat(_animIDMotionSpeed, inputMagnitude);
             }
+        }
+
+        public void Die()
+        {
+            if (_isDead) return; // 이미 죽었으면 중복 호출 방지
+                _isDead = true;
+
+            // 애니메이션 트리거 실행
+                _animator.SetTrigger("Die");
+
+            // 움직임 및 입력 차단
+                _controller.enabled = false; // 캐릭터 이동 막음
+                _input.move = Vector2.zero;
+                _input.attack = false;
+                _input.sprint = false;
+                _input.jump = false;
+
+                Debug.Log("플레이어 사망 처리 완료");
+
+                // (선택) 일정 시간 뒤 게임 오버 처리
+                // Invoke(nameof(OnDeathComplete), 3f);
         }
 
         private void JumpAndGravity()
@@ -364,7 +396,7 @@ namespace StarterAssets
         {
             // 방패 모션 중이면 공격 금지
             if (_animator.GetCurrentAnimatorStateInfo(0).IsTag("Block")) return;
-            
+
             if (_input.attack) // 마우스 왼쪽 클릭하면
             {
                 if (_hasAnimator)
@@ -388,7 +420,12 @@ namespace StarterAssets
             {
                 if (_hasAnimator)
                 {
-                    _animator.SetBool(_animIDBlock, false); // 방패 내리기
+                    bool isBlocking = Mouse.current.rightButton.isPressed;
+    
+                        if (_animator.GetBool(_animIDBlock) != isBlocking)
+                        {
+                            _animator.SetBool(_animIDBlock, isBlocking);
+                        }
                 }
             }
 
@@ -397,6 +434,22 @@ namespace StarterAssets
                 if (_hasAnimator)
                 {
                     _animator.SetTrigger(_animIDAttack2); // Attack2 실행
+                }
+            }
+
+            if (Keyboard.current.eKey.wasPressedThisFrame) //E키 입력 체크
+            {
+                if (_hasAnimator)
+                {
+                    _animator.SetTrigger(_animIDAttack3); // Attack3 실행
+                }
+            }
+            
+            if (Keyboard.current.rKey.wasPressedThisFrame) //R키 입력 체크
+            {
+                if (_hasAnimator)
+                {
+                    _animator.SetTrigger(_animIDAttack4); // Attack4 실행
                 }
             }
         }
@@ -451,7 +504,7 @@ namespace StarterAssets
             AnimatorStateInfo stateInfo = _animator.GetCurrentAnimatorStateInfo(0);
 
             //Attack1 또는 Attack2 상태일 때만 Root Motion 활성화
-            if (stateInfo.IsName("Attack1") || stateInfo.IsName("Attack2"))
+            if (stateInfo.IsName("Attack1") || stateInfo.IsName("Attack2") || stateInfo.IsName("Attack3"))
             {
                 _animator.applyRootMotion = true;
             }
