@@ -78,6 +78,9 @@ namespace StarterAssets
         [Header("Effects")]
         public SlashEffect slashVFX; // 이펙트 스크립트 연결
         public ParticleSystem attack2VFX; // Attack2 이펙트 추가
+         public ParticleSystem attack3VFX; // Attack2 이펙트 추가
+         public ParticleSystem attack4VFX; // Attack2 이펙트 추가
+         public ParticleSystem attack4_1VFX; // Attack2 이펙트 추가
         public ParticleSystem BlockVFX; // Attack2 이펙트 추가
 
 
@@ -475,6 +478,30 @@ namespace StarterAssets
                     attack2VFX.Play();
                 }
         }
+        
+        private void Skill2()
+        {
+            if (attack3VFX != null) // 이펙트 실행
+                {
+                    attack3VFX.Play();
+                }
+        }
+
+        private void Skill3()
+        {
+            if (attack4VFX != null) // 이펙트 실행
+                {
+                    attack4VFX.Play();
+                }
+        }
+
+        private void Skill4()
+        {
+            if (attack4_1VFX != null) // 이펙트 실행
+                {
+                    attack4_1VFX.Play();
+                }
+        }
 
         private void Block()
         {
@@ -482,7 +509,7 @@ namespace StarterAssets
             {
                 BlockVFX.Play();
             }
-            
+
         }
 
 
